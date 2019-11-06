@@ -1,5 +1,6 @@
 #!/bin/python3
 import RPi.GPIO as io
+import cv2
 
 class output:
     int u=31, d=33, l=36, r=37 #pinos de controle para cima, baixo, esquerda e direita
@@ -34,6 +35,23 @@ class output:
         io.output(d, io.HIGH)
         io.output(l, io.HIGH)
         io.output(r, io.HIGH)
+
+class cam:
+    width = 640
+    height = 480
+    exposure_time = 0.1
+
+    preparar()
+        #capture from camera at location 0
+        cap = cv2.VideoCapture(0)
+        #set the width and height, and UNSUCCESSFULLY set the exposure time
+        cap.set(3,width)
+        cap.set(4,height)
+        cap.set(15, exposure_time)
+
+    capturar()
+        ret, img = cap.read()
+        cv2.imshow("input", img)
 
 #info fisica
 d = 1.51e-3;         #pupil size = 1.51 mm
