@@ -1,50 +1,39 @@
 #!/bin/python3
 import RPi.GPIO as io
 
-int u=31, d=33, l=36, r=37 #pinos de controle para cima, baixo, esquerda e direita
-
-cima()
-{
-    io.output(u, io.LOW)
-    io.output(d, io.HIGH)
-    io.output(l, io.HIGH)
-    io.output(r, io.HIGH)
-}
-baixo()
-{
-    io.output(u, io.HIGH)
-    io.output(d, io.LOW)
-    io.output(l, io.HIGH)
-    io.output(r, io.HIGH)
-}
-esquerda()
-{
-    io.output(u, io.HIGH)
-    io.output(d, io.HIGH)
-    io.output(l, io.LOW)
-    io.output(r, io.HIGH)
-}
-direita()
-{
-    io.output(u, io.HIGH)
-    io.output(d, io.HIGH)
-    io.output(l, io.HIGH)
-    io.output(r, io.LOW)
-}
-
-io.setmode(io.BOARD)
-io.setup(u, io.OUT)
-io.setup(d, io.OUT)
-io.setup(l, io.OUT)
-io.setup(r, io.OUT)
-
-parado()
-{
-    io.output(u, io.HIGH)
-    io.output(d, io.HIGH)
-    io.output(l, io.HIGH)
-    io.output(r, io.HIGH)
-}
+class output:
+    int u=31, d=33, l=36, r=37 #pinos de controle para cima, baixo, esquerda e direita
+    preparar()
+        io.setmode(io.BOARD)
+        io.setup(u, io.OUT)
+        io.setup(d, io.OUT)
+        io.setup(l, io.OUT)
+        io.setup(r, io.OUT)
+    cima()
+        io.output(u, io.LOW)
+        io.output(d, io.HIGH)
+        io.output(l, io.HIGH)
+        io.output(r, io.HIGH)
+    baixo()
+        io.output(u, io.HIGH)
+        io.output(d, io.LOW)
+        io.output(l, io.HIGH)
+        io.output(r, io.HIGH)
+    esquerda()
+        io.output(u, io.HIGH)
+        io.output(d, io.HIGH)
+        io.output(l, io.LOW)
+        io.output(r, io.HIGH)
+    direita()
+        io.output(u, io.HIGH)
+        io.output(d, io.HIGH)
+        io.output(l, io.HIGH)
+        io.output(r, io.LOW)
+    parado()
+        io.output(u, io.HIGH)
+        io.output(d, io.HIGH)
+        io.output(l, io.HIGH)
+        io.output(r, io.HIGH)
 
 #info fisica
 d = 1.51e-3;         #pupil size = 1.51 mm
@@ -56,8 +45,6 @@ pixsize = 3.75e-6;       #Pixel size
 #info resol cam
 ymax= 479;
 xmax= 639;
-
-
 
 #info = imaqhwinfo; para saber o nome da camera
 
