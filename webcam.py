@@ -1,16 +1,18 @@
-#!/bin/python3
+#!/usr/bin/python3
 import RPi.GPIO as io
 import cv2
+import time
+import sys
 
-class output:
+class outputClass:
     u,d,l,r = 31,33,36,37 #pinos de controle para cima, baixo, esquerda e direita
 
-    def preparar():
+    def __init__(self):
         io.setmode(io.BOARD)
-        io.setup(u, io.OUT)
-        io.setup(d, io.OUT)
-        io.setup(l, io.OUT)
-        io.setup(r, io.OUT)
+        io.setup(self.u, io.OUT)
+        io.setup(self.d, io.OUT)
+        io.setup(self.l, io.OUT)
+        io.setup(self.r, io.OUT)
     def cima():
         io.output(u, io.LOW)
         io.output(d, io.HIGH)
@@ -37,34 +39,84 @@ class output:
         io.output(l, io.HIGH)
         io.output(r, io.HIGH)
 
-class cam:
-    width = 640
-    height = 480
-    exposure_time = 0.1
+class camClass:
+	width = 640
+	height = 480
+	exposure_time = 0.1
+	
+	ExposureMode = 'manual'
+	Exposure=-9
+	Brightness=235
+	WhiteBalance=3500
+	Sharpness = 10
+	Gain=230
+	Saturation=10
+	Contrast=150
+	
+	ymax = 479
+	xmax = 639
+	
+	def __init__(self):
+		#capture from camera at location 0
+		self.cap = cv2.VideoCapture(0)
+		time.sleep(2)
+		print('Opened camera: ', self.cap)
+		#set the width and height, and UNSUCCESSFULLY set the exposure time
+		#self.cap.set(3,self.width)
+		#self.cap.set(4,self.height)
+		#self.cap.set(15, self.exposure_time)
 
-    ExposureMode = 'manual';
-    Exposure=-9
-    Brightness=235
-    WhiteBalance=3500
-    Sharpness = 10
-    Gain=230
-    Saturation=10
-    Contrast=150
+	def capturar(self):
+		ret, img = self.cap.read()
+		print('Read camera. ret = ', ret)
+		#while(True):
+		#	ret, img = self.cap.read()
+			#print('ret=', ret, ' img=',img)
+			#if cv2.waitKey(1) & 0xFF == ord('q'):
+			#	break
+		return ret, img
+	
+class uiClass :
+	global mouseX, mouseY, mouseFlag
+	def __init__(self):
+		cv2.namedWindow("Selecione a Região de Interesse", 0)
+		cv2.setMouseCallback("Selecione a Região de Interesse", get_mouse_position)
+	def selecionar_roi (self):
+		#initialize mouse callback variables
+		mouseFlag = 0
+		mouseX = 0
+		mouseY = 0
+		#initialize return variables
+		ret = 0
+		x = 0
+		y = 0
+		while(True):
+			ret, img = cam.capturar()
+			#sucessful read
+			if (ret == True):
+				cv2.imshow("Selecione a Região de Interesse", img)
+				if(cv2.waitKey(1) & 0xFF == ord('q')):
+					print ("Q button pressed.")
+					ret = 1
+					break
+			#read problem
+			else:
+				print("Could not capture image.")
+				ret = 2
+				break
+			#mouse clicked event
+			if(mouseFlag):
+				print('Mouse FLAG detected position', mouseX,mouseY)
+				x,y = mouseX,mouseY
+				break
+		return ret, x, y, img
 
-    ymax = 479
-    xmax = 639
-
-    def preparar():
-        #capture from camera at location 0
-        cap = cv2.VideoCapture(0)
-        #set the width and height, and UNSUCCESSFULLY set the exposure time
-        cap.set(3,width)
-        cap.set(4,height)
-        cap.set(15, exposure_time)
-
-    def capturar():
-        ret, img = cap.read()
-        cv2.imshow("input", img)
+def get_mouse_position(event,x,y,flags,param):
+	global mouseX, mouseY, mouseFlag
+	if event == cv2.EVENT_LBUTTONUP:
+		print('Mouse flag detected click', x, y)
+		mouseX, mouseY = x,y
+		mouseFlag = 1
 
 #info fisica
 d = 1.51e-3         #pupil size = 1.51 mm
@@ -72,29 +124,33 @@ l = 635e-9    #Wavelength = 635nm
 f = 75e-3       #Focal Length = 75 mm
 pixsize = 3.75e-6       #Pixel size
 
-print (d+" "+l+" "+f)
+print ('d= ', d, "l= ", l, "f= ", f)
 
 # truncating the image's boundaries to its limits. Makes possible the
 # cropping
-[ret, img] = cam.capturar()
-cv2.imshow("Selecione a Região de Interesse", img)
-[x,y] = ginput(1)
+cam = camClass()
+ui = uiClass()
+#ret, img = cam.capturar()
+#cv2.imshow("imagem capturada", img)
+#cv2.waitKey(0)
+#cv2.destroyWindow("imagem capturada")
+ret, x, y, img = ui.selecionar_roi()
+if (ret > 0):
+	print("Closing application")
+	sys.exit(0)
 
-if y>cam.ymax-50 :
-   y=cam.ymax-50
-elif y<50 :
-   y=50
+if (y>cam.ymax-50) :
+	y=cam.ymax-50
+elif (y<50) :
+	y=50
 
-if x>xmax-50 :
-   x=xmax-50
+if (x>cam.xmax-50) :
+   x=cam.xmax-50
 elif x<50 :
-   x=50;
-
-# Acquire a single image.
-[ret, rgbImage] = cam.capture()
+   x=50
 
 # Convert RGB to grayscale.
-grayImage = rgb2gray(rgbImage);
+grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY);
 # Crops the image
 grayImageCrop = grayImage[(y-49):(y+49)][(x-49):(49+x)];
 
