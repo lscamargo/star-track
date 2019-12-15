@@ -87,7 +87,8 @@ class uiClass :
 		if (ret == 0) :
 			print ("Falha o capturar")
 			return -1, -1, -1
-		cv2.imshow("Selecione a Região de Interesse", img)
+		center_img = display.getCenter(img)
+		cv2.imshow("Selecione a Região de Interesse", center_img)
 		
 		print ("Clique na imagem para selecionar uma estrela")
 
@@ -115,6 +116,16 @@ def get_mouse_position(event,x,y,flags,param):
 		mouseFlag = 1
 		print("mouseFlag =", mouseFlag)
 
+class displayClass :
+	height = 480
+	width = 320
+	def getCenter(self, image) :
+		camWidth, camHeight, channels = image.shape
+		x = int((camWidth - self.width)/2)
+		y = int((camHeight - self.height)/2)
+		outImage = image[x:x+self.width, y:y+self.height]
+		return outImage
+	
 #info fisica
 d = 1.51e-3         #pupil size = 1.51 mm
 l = 635e-9    #Wavelength = 635nm
@@ -130,6 +141,7 @@ mouseX, mouseY, mouseFlag = -1, -1, 0
 # cropping
 cam = camClass()
 ui = uiClass()
+display = displayClass()
 #ret, img = cam.capturar()
 #cv2.imshow("imagem capturada", img)
 #cv2.waitKey(0)
