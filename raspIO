@@ -11,31 +11,31 @@ class outputClass:
         io.setup(self.d, io.OUT)
         io.setup(self.l, io.OUT)
         io.setup(self.r, io.OUT)
-    def cima():
-        io.output(u, io.LOW)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
-    def baixo():
-        io.output(u, io.HIGH)
-        io.output(d, io.LOW)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
-    def esquerda():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.LOW)
-        io.output(r, io.HIGH)
-    def direita():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.LOW)
-    def parado():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
+    def cima(self):
+        io.output(self.u, io.LOW)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+    def baixo(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.LOW)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+    def esquerda(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.LOW)
+        io.output(self.r, io.HIGH)
+    def direita(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.LOW)
+    def parado(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
 
 out = outputClass()
 print("inicio")
@@ -56,3 +56,6 @@ while(True):
 	if (key == ('r')):
 		print("direita")
 		out.direita()
+	if (key == ('s')):
+		print("parado")
+		out.parado()
