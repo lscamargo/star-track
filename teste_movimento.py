@@ -13,31 +13,31 @@ class outputClass:
         io.setup(self.d, io.OUT)
         io.setup(self.l, io.OUT)
         io.setup(self.r, io.OUT)
-    def cima():
-        io.output(u, io.LOW)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
-    def baixo():
-        io.output(u, io.HIGH)
-        io.output(d, io.LOW)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
-    def esquerda():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.LOW)
-        io.output(r, io.HIGH)
-    def direita():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.LOW)
-    def parado():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
+    def cima(self):
+        io.output(self.u, io.LOW)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+    def baixo(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.LOW)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+    def esquerda(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.LOW)
+        io.output(self.r, io.HIGH)
+    def direita(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.LOW)
+    def parado(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
 
 class camClass:
 	width = 640
@@ -106,6 +106,31 @@ class uiClass :
 				print ("Mouse click detectado")
 				return 0, mouseX, mouseY
 				
+def move_test():
+	ret, img = cam.capturar()
+	if (ret == 0) :
+		print ("Falha o capturar")
+		return -1, -1, -1
+	center_img = display.getCenter(img)
+	cv2.imshow("Teste de movimento", center_img)
+	while( True) :
+		key = cv2.waitKey(1) & 0xFF 
+		if (key == ord('q')) :
+			print ("Q button pressed.")
+			sys.exit(0)
+		if (key == ord('u')) :
+			print ("U button pressed.")
+			out.cima()
+		if (key == ord('d')) :
+			print ("D button pressed.")
+			out.baixo()
+		if (key == ord('l')) :
+			print ("L button pressed.")
+			out.esquerda()
+		if (key == ord('r')) :
+			print ("R button pressed.")
+			out.direita()
+
 
 def get_mouse_position(event,x,y,flags,param):
 	global mouseX, mouseY, mouseFlag
@@ -141,52 +166,9 @@ mouseX, mouseY, mouseFlag = -1, -1, 0
 cam = camClass()
 ui = uiClass()
 display = displayClass()
+out = outputClass()
 #ret, img = cam.capturar()
 #cv2.imshow("imagem capturada", img)
 #cv2.waitKey(0)
 #cv2.destroyWindow("imagem capturada")
-ret, x, y = ui.select_roi()
-if (ret > 0):
-	print("Closing application")
-	sys.exit(0)
-
-if (y>cam.ymax-50) :
-	y=cam.ymax-50
-elif (y<50) :
-	y=50
-
-if (x>cam.xmax-50) :
-   x=cam.xmax-50
-elif x<50 :
-   x=50
-
-## Convert RGB to grayscale.
-#grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY);
-## Crops the image
-#grayImageCrop = grayImage[(y-49):(y+49)][(x-49):(49+x)];
-#
-## TCOG calculus over the cropped image
-#[slopey, slopex] = TCOG(double(grayImageCrop),0.8);    #Thresholded center of gravity
-#
-##circle coordinates
-#y_circle=slopey+50;
-#x_circle=slopex+50;
-#
-## Display the image.
-#cam.imshow("output", grayImageCrop);
-#plot(x_circle, y_circle, 'ro', 'MarkerSize', 10);
-#
-##gera os comandos
-#if slopey>5 :
-#    cima()
-#elif slopey<-5 :
-#    baixo
-#else:
-#    parado()
-#
-#if slopex<-5 :
-#    direita()
-#elif slopex>5 :
-#    esquerda()
-#else:
-#    parado()
+move_test()
