@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import numpy as np
 
 def show(img, name = "name"):
 	cv2.imshow(name, img)
@@ -10,7 +11,6 @@ def print_size(img):
 	print("Height:", len(img[0]))
 
 def centro_gravidade(grayImg, threshold = 127):
-	print (grayImg)
 	width = len(grayImg)
 	height = len(grayImg[0])
 	thImg = (grayImg >= threshold) * grayImg
@@ -32,17 +32,20 @@ height = 480
 exposure_time = 0.1
 
 cap = cv2.VideoCapture(0)
-#cap.set(3,width)
-#cap.set(4,height)
-#cap.set(15, exposure_time)
-ret, img = cap.read()
-if (ret != True):
-	print ("failed to capture image")
-print_size(img)
 
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-show(gray, "Escala de cinza")
-print_size(gray)
-
-x,y = centro_gravidade(gray)
+w, h = 3, 3;
+Matrix = np.matrix([[0 for x in range(w)] for y in range(h)])
+Matrix[0][0]=1
+print(Matrix)
+x,y = centro_gravidade(Matrix, 0)
 print(x,y)
+
+while (False):
+	ret, img = cap.read()
+	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	cv2.imshow("Escala de cinza", gray)
+	x,y = centro_gravidade(gray)
+	print(x,y)
+	key = cv2.waitKey(1) & 0xFF 
+	if (key == ord('q')) :
+		break
