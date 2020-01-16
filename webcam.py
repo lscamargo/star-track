@@ -1,8 +1,9 @@
 #!/usr/bin/python3
-import RPi.GPIO as io
+#import RPi.GPIO as io
 import cv2
 import time
 import sys
+import math
 
 class outputClass:
     u,d,l,r = 31,33,36,37 #pinos de controle para cima, baixo, esquerda e direita
@@ -13,31 +14,31 @@ class outputClass:
         io.setup(self.d, io.OUT)
         io.setup(self.l, io.OUT)
         io.setup(self.r, io.OUT)
-    def cima():
-        io.output(u, io.LOW)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
-    def baixo():
-        io.output(u, io.HIGH)
-        io.output(d, io.LOW)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
-    def esquerda():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.LOW)
-        io.output(r, io.HIGH)
-    def direita():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.LOW)
-    def parado():
-        io.output(u, io.HIGH)
-        io.output(d, io.HIGH)
-        io.output(l, io.HIGH)
-        io.output(r, io.HIGH)
+    def cima(self):
+        io.output(self.u, io.LOW)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+    def baixo(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.LOW)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+    def esquerda(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.LOW)
+        io.output(self.r, io.HIGH)
+    def direita(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.LOW)
+    def parado(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
 
 class camClass:
 	width = 640
@@ -68,7 +69,7 @@ class camClass:
 
 	def capturar(self):
 		ret, img = self.cap.read()
-		print('Read camera. ret = ', ret)
+		#print('Read camera. ret = ', ret)
 		#while(True):
 		#	ret, img = self.cap.read()
 			#print('ret=', ret, ' img=',img)
@@ -76,8 +77,10 @@ class camClass:
 			#	break
 		return ret, img
 	
-class uiClass :
-	def select_roi (self):
+class roiClass :
+	roi_width = 150
+	roi_height = 150
+	def get_click (self):
 		global mouseX, mouseY, mouseFlag
 		mouseX, mouseY, mouseFlag = -1, -1, 0
 		cv2.namedWindow("Selecione a Região de Interesse")
@@ -86,8 +89,7 @@ class uiClass :
 		if (ret == 0) :
 			print ("Falha o capturar")
 			return -1, -1, -1
-		center_img = display.getCenter(img)
-		cv2.imshow("Selecione a Região de Interesse", center_img)
+		cv2.imshow("Selecione a Região de Interesse", img)
 		
 		print ("Clique na imagem para selecionar uma estrela")
 
@@ -96,35 +98,98 @@ class uiClass :
 		while( True) :
 			key = cv2.waitKey(1) & 0xFF 
 			if (key == ord('q')) :
-				print ("Q button pressed.")
+				print ("Botão Q pressionado. Saindo.")
 				sys.exit(0)
 			if (key == ord('\n')) :
-				print ("Enter button pressed.")
+				print ("Botão Enter pressionado.")
 				print("mouseFlag =", mouseFlag)
-
 			if (mouseFlag == 1) :
 				print ("Mouse click detectado")
 				return 0, mouseX, mouseY
-				
+	def get_indexes (self, x, y, w, h):
+		roi_width = self.roi_width
+		roi_height = self.roi_height
+		if(x < roi_width/2):
+			xa = 0
+			xb = roi_width
+		elif(x + roi_width/2 > w):
+			xa = w - roi_width
+			xb = w
+		else:
+			xa = x - roi_width/2
+			xb = x + roi_width/2
+
+		if(y < roi_height/2):
+			ya = 0
+			yb = roi_height
+		elif(y + roi_height/2 > h):
+			ya = h - roi_height
+			yb = h
+		else:
+			ya = y - roi_height/2
+			yb = y + roi_height/2
+		return int(xa), int(xb), int(ya), int(yb)
+
 
 def get_mouse_position(event,x,y,flags,param):
 	global mouseX, mouseY, mouseFlag
 	if event == cv2.EVENT_LBUTTONUP:
-		print('Mouse flag detected click', x, y, mouseFlag)
+		#print('Mouse flag detected click', x, y, mouseFlag)
 		mouseX, mouseY = x,y
 		mouseFlag = 1
-		print("mouseFlag =", mouseFlag)
+		#print("mouseFlag =", mouseFlag)
 
 class displayClass :
+	width = 640
 	height = 480
-	width = 320
 	def getCenter(self, image) :
 		camWidth, camHeight, channels = image.shape
 		x = int((camWidth - self.width)/2)
 		y = int((camHeight - self.height)/2)
 		outImage = image[x:x+self.width, y:y+self.height]
 		return outImage
-	
+
+def centro_gravidade(grayImg, threshold = 127):
+	height, width = grayImg.shape
+	thImg = (grayImg >= threshold) * grayImg
+	xcenter, ycenter, w, wTotal = 0, 0, 0, 0
+	for x in range(0, width-1):
+		for y in range(0, height-1):
+			w = thImg[y,x]
+			wTotal += w
+			xcenter += x*w
+			ycenter += y*w
+	xcenter /= wTotal
+	ycenter /= wTotal
+	return xcenter, ycenter
+
+def show(img, name = "name"):
+	cv2.imshow(name, img)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
+
+def draw_cross(img, xf, yf):
+	if (math.isnan(xf) or math.isnan(yf)) :
+		return
+	x = int(xf)
+	y = int(yf)
+	l = 5
+	color = (0, 255, 0)
+	#ponto_inicial = (y-l, x)
+	#ponto_final = (y+l, x)
+	ponto_inicial = (x, y-l)
+	ponto_final = (x, y+l)
+	x
+	y
+	l
+	ponto_inicial
+	ponto_final
+	img = cv2.line(img, ponto_inicial, ponto_final, color, 1)
+	ponto_inicial = (x-l, y)
+	ponto_final = (x+l, y)
+	img = cv2.line(img, ponto_inicial, ponto_final, color, 1)
+
+
 #info fisica
 d = 1.51e-3         #pupil size = 1.51 mm
 l = 635e-9    #Wavelength = 635nm
@@ -133,60 +198,27 @@ pixsize = 3.75e-6       #Pixel size
 
 print ('d= ', d, "l= ", l, "f= ", f)
 
-#mouse global variables
+#Variáveis globais do mouse
 mouseX, mouseY, mouseFlag = -1, -1, 0
 
-# truncating the image's boundaries to its limits. Makes possible the
-# cropping
+#initializa classes
 cam = camClass()
-ui = uiClass()
+roi = roiClass()
 display = displayClass()
-#ret, img = cam.capturar()
-#cv2.imshow("imagem capturada", img)
-#cv2.waitKey(0)
-#cv2.destroyWindow("imagem capturada")
-ret, x, y = ui.select_roi()
-if (ret > 0):
-	print("Closing application")
-	sys.exit(0)
 
-if (y>cam.ymax-50) :
-	y=cam.ymax-50
-elif (y<50) :
-	y=50
-
-if (x>cam.xmax-50) :
-   x=cam.xmax-50
-elif x<50 :
-   x=50
-
-## Convert RGB to grayscale.
-#grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY);
-## Crops the image
-#grayImageCrop = grayImage[(y-49):(y+49)][(x-49):(49+x)];
-#
-## TCOG calculus over the cropped image
-#[slopey, slopex] = TCOG(double(grayImageCrop),0.8);    #Thresholded center of gravity
-#
-##circle coordinates
-#y_circle=slopey+50;
-#x_circle=slopex+50;
-#
-## Display the image.
-#cam.imshow("output", grayImageCrop);
-#plot(x_circle, y_circle, 'ro', 'MarkerSize', 10);
-#
-##gera os comandos
-#if slopey>5 :
-#    cima()
-#elif slopey<-5 :
-#    baixo
-#else:
-#    parado()
-#
-#if slopex<-5 :
-#    direita()
-#elif slopex>5 :
-#    esquerda()
-#else:
-#    parado()
+ret, x, y = roi.get_click()
+xa, xb, ya, yb = roi.get_indexes(x, y, display.width, display.height)
+print(xa, xb, ya, yb)
+while(True):
+	ret, img = cam.capturar()
+	#show(img)
+	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	img_roi = gray[ya:yb,xa:xb]
+	x, y = centro_gravidade(img_roi)
+	print(x, y)
+	img_roi_color = img[ya:yb,xa:xb]
+	draw_cross(img_roi_color, x, y)
+	cv2.imshow("ROI", img_roi_color)
+	key = cv2.waitKey(1) & 0xFF
+	if(key == ord('q')):
+		break
