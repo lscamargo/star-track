@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import numpy as np
+import cv2
 
 def show(img, name = "name"):
 	cv2.imshow(name, img)
@@ -19,11 +20,6 @@ def centro_gravidade(grayImg, threshold = 127):
 	xcenter /= wTotal
 	ycenter /= wTotal
 	return xcenter, ycenter
-
-import cv2
-width = 640
-height = 480
-exposure_time = 0.1
 
 cap = cv2.VideoCapture(0)
 
