@@ -6,39 +6,33 @@ import sys
 import math
 
 class outputClass:
-    u,d,l,r = 31,33,36,37 #pinos de controle para cima, baixo, esquerda e direita
-
-    def __init__(self):
-        io.setmode(io.BOARD)
-        io.setup(self.u, io.OUT)
-        io.setup(self.d, io.OUT)
-        io.setup(self.l, io.OUT)
-        io.setup(self.r, io.OUT)
-    def cima(self):
-        io.output(self.u, io.LOW)
-        io.output(self.d, io.HIGH)
-        io.output(self.l, io.HIGH)
-        io.output(self.r, io.HIGH)
-    def baixo(self):
-        io.output(self.u, io.HIGH)
-        io.output(self.d, io.LOW)
-        io.output(self.l, io.HIGH)
-        io.output(self.r, io.HIGH)
-    def esquerda(self):
-        io.output(self.u, io.HIGH)
-        io.output(self.d, io.HIGH)
-        io.output(self.l, io.LOW)
-        io.output(self.r, io.HIGH)
-    def direita(self):
-        io.output(self.u, io.HIGH)
-        io.output(self.d, io.HIGH)
-        io.output(self.l, io.HIGH)
-        io.output(self.r, io.LOW)
-    def parado(self):
-        io.output(self.u, io.HIGH)
-        io.output(self.d, io.HIGH)
-        io.output(self.l, io.HIGH)
-        io.output(self.r, io.HIGH)
+	u,d,l,r = 31,33,36,37 #pinos de controle para cima, baixo, esquerda e direita
+	def __init__(self):
+		io.setmode(io.BOARD)
+		io.setup(self.u, io.OUT)
+		io.setup(self.d, io.OUT)
+		io.setup(self.l, io.OUT)
+		io.setup(self.r, io.OUT)
+	def cima(self):
+		self.write(0,1,1,1)
+	def baixo(self):
+		self.write(1,0,1,1)
+	def esquerda(self):
+		self.write(1,1,0,1)
+	def direita(self):
+		self.write(1,1,1,0)
+	def parado(self):
+		self.write(1,1,1,1)
+	def write(self, du, dd, dl, dr):
+		io.output(self.u, self.hl(du))
+		io.output(self.d, self.hl(dd))
+		io.output(self.l, self.hl(dl))
+		io.output(self.r, self.hl(dr))
+	def hl(x):
+		if (x == 0):
+			return io.LOW
+		else:
+			return io.HIGH
 
 class camClass:
 	width = 640
@@ -78,8 +72,8 @@ class camClass:
 		return ret, img
 	
 class roiClass :
-	roi_width = 150
-	roi_height = 150
+	roi_width = 100
+	roi_height = 100
 	def get_click (self):
 		global mouseX, mouseY, mouseFlag
 		mouseX, mouseY, mouseFlag = -1, -1, 0
