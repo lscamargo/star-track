@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#import RPi.GPIO as io
+import RPi.GPIO as io
 import cv2
 import time
 import sys
@@ -14,21 +14,26 @@ class outputClass:
 		io.setup(self.l, io.OUT)
 		io.setup(self.r, io.OUT)
 	def cima(self):
+		print("cima")
 		self.write(0,1,1,1)
 	def baixo(self):
+		print("baixo")
 		self.write(1,0,1,1)
 	def esquerda(self):
+		print("esquerda")
 		self.write(1,1,0,1)
 	def direita(self):
+		print("direita")
 		self.write(1,1,1,0)
 	def parado(self):
+		print("parado")
 		self.write(1,1,1,1)
 	def write(self, du, dd, dl, dr):
 		io.output(self.u, self.hl(du))
 		io.output(self.d, self.hl(dd))
 		io.output(self.l, self.hl(dl))
 		io.output(self.r, self.hl(dr))
-	def hl(x):
+	def hl(self, x):
 		if (x == 0):
 			return io.LOW
 		else:
