@@ -1,0 +1,61 @@
+#!/usr/bin/python3
+import RPi.GPIO as io
+import sys
+
+class outputClass:
+    u,d,l,r = 31,33,36,37 #pinos de controle para cima, baixo, esquerda e direita
+
+    def __init__(self):
+        io.setmode(io.BOARD)
+        io.setup(self.u, io.OUT)
+        io.setup(self.d, io.OUT)
+        io.setup(self.l, io.OUT)
+        io.setup(self.r, io.OUT)
+    def cima(self):
+        io.output(self.u, io.LOW)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+    def baixo(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.LOW)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+    def esquerda(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.LOW)
+        io.output(self.r, io.HIGH)
+    def direita(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.LOW)
+    def parado(self):
+        io.output(self.u, io.HIGH)
+        io.output(self.d, io.HIGH)
+        io.output(self.l, io.HIGH)
+        io.output(self.r, io.HIGH)
+
+out = outputClass()
+print("inicio")
+while(True):
+	key = input()
+	if (key == ('q')):
+		print("Q pressionado. Saindo.")
+		sys.exit(0)
+	if (key == ('u')):
+		print("cima")
+		out.cima()
+	if (key == ('d')):
+		print("baixo")
+		out.baixo()
+	if (key == ('l')):
+		print("esquerda")
+		out.esquerda()
+	if (key == ('r')):
+		print("direita")
+		out.direita()
+	if (key == ('s')):
+		print("parado")
+		out.parado()
