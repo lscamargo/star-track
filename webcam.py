@@ -99,6 +99,7 @@ class roiClass :
 				print("mouseFlag =", mouseFlag)
 			if (mouseFlag == 1) :
 				print ("Mouse click detectado")
+				cv2.destroyAllWindows()
 				return 0, mouseX, mouseY
 	def get_indexes (self, x, y, w, h):
 		roi_width = self.roi_width
@@ -183,6 +184,47 @@ def draw_cross(img, xf, yf):
 	ponto_final = (x+l, y)
 	img = cv2.line(img, ponto_inicial, ponto_final, color, 1)
 
+class controlClass:
+	offset = 0
+	estado = "P"
+	#def __init__(self):
+	#	self.offset = 0
+	#	self.estado = "P"
+	def on_off(self, x, y, xt, yt):
+		print(x)
+		print(y)
+		print(xt)
+		print(yt)
+		xe = x-xt
+		ye = y-yt
+		print(xe)
+		print(ye)
+		if(abs(xe) > abs(ye)):
+			if (xe > 0 + self.offset/2):
+				self.change("E")
+				out.esquerda()
+			elif(xe < 0 - self.offset/2):
+				self.change("D")
+				out.direita()
+			else:
+				self.change("P")
+				out.parado()
+		else:
+			if (ye > 0 + self.offset/2):
+				self.change("C")
+				out.cima()
+			elif(ye < 0 - self.offset/2):
+				self.change("B")
+				out.baixo()
+			else:
+				self.change("P")
+				out.parado()
+
+	def change(self, novo_estado):
+		if(self.estado != novo_estado):
+			print("change")
+			time.sleep(0.2)
+			self.estado = novo_estado
 
 #info fisica
 d = 1.51e-3         #pupil size = 1.51 mm
@@ -199,6 +241,8 @@ mouseX, mouseY, mouseFlag = -1, -1, 0
 cam = camClass()
 roi = roiClass()
 display = displayClass()
+control = controlClass()
+out = outputClass()
 
 ret, x, y = roi.get_click()
 xa, xb, ya, yb = roi.get_indexes(x, y, display.width, display.height)
@@ -213,6 +257,7 @@ while(True):
 	img_roi_color = img[ya:yb,xa:xb]
 	draw_cross(img_roi_color, x, y)
 	cv2.imshow("ROI", img_roi_color)
+	control.on_off(x, y, roi.roi_width/2, roi.roi_height/2)
 	key = cv2.waitKey(1) & 0xFF
 	if(key == ord('q')):
 		break
