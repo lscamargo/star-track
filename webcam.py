@@ -4,9 +4,11 @@ import cv2
 import time
 import sys
 import math
+from matplotlib import pyplot as plt
+import numpy as np
 
 class outputClass:
-	u,d,l,r = 31,33,36,37 #pinos de controle para cima, baixo, esquerda e direita
+	u,d,l,r = 33,37,36,31 #pinos de controle para cima, baixo, esquerda e direita
 	def __init__(self):
 		io.setmode(io.BOARD)
 		io.setup(self.u, io.OUT)
@@ -52,7 +54,7 @@ class camClass:
 	xmax = Width-1
 	
 	def __init__(self):
-		self.cap = cv2.VideoCapture(1)
+		self.cap = cv2.VideoCapture(0)
 		time.sleep(2)
 		print('Opened camera: ', self.cap)
 
@@ -81,8 +83,8 @@ class camClass:
 		return ret, img
 	
 class roiClass :
-	roi_width = 100
-	roi_height = 100
+	roi_width = 50
+	roi_height = 50
 	def get_click (self):
 		global mouseX, mouseY, mouseFlag
 		mouseX, mouseY, mouseFlag = -1, -1, 0
@@ -194,7 +196,7 @@ def draw_cross(img, xf, yf):
 	img = cv2.line(img, ponto_inicial, ponto_final, color, 1)
 
 class controlClass:
-	offset = 0
+	offset = 4
 	estado = "P"
 	#def __init__(self):
 	#	self.offset = 0
@@ -232,9 +234,36 @@ class controlClass:
 	def change(self, novo_estado):
 		if(self.estado != novo_estado):
 			print("change")
-			time.sleep(0.2)
+			time.sleep(0.5)
 			self.estado = novo_estado
 
+class graficoErroClass:
+	def __init__(self):
+		self.tempo_inicial = time.time()
+		self.tamanho_max = 300
+		self.tamanho = 0
+		self.x_list = []
+		self.y_list = []
+		self.t_list = []
+	def add(self, x, y, t):
+		self.tamanho += 1
+		print("Tamanho = ", self.tamanho)
+		if(self.tamanho > self.tamanho_max):
+			return
+		self.x_list += [y]
+		self.y_list += [x]
+		self.t_list += [(int)(t-self.tempo_inicial)]
+	def plot(self):
+		plt.plot(self.x_list, label='x')
+		plt.plot(self.y_list, label='y')
+		#personaliza labels do eixo x:
+		y_pos = np.arange(len(self.t_list))
+		plt.xticks(y_pos, self.t_list, color='orange', fontsize='8')
+		plt.title('Gráfico do Centro de Gravidade em função do tempo')
+		plt.ylabel('Centro de Gravidade')
+		plt.show()
+
+	
 #info fisica
 d = 1.51e-3         #pupil size = 1.51 mm
 l = 635e-9    #Wavelength = 635nm
@@ -252,6 +281,7 @@ roi = roiClass()
 display = displayClass()
 control = controlClass()
 out = outputClass()
+graficoErro = graficoErroClass()
 
 ret, x, y = roi.get_click()
 xa, xb, ya, yb = roi.get_indexes(x, y, display.width, display.height)
@@ -262,12 +292,17 @@ while(True):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	#cv2.imshow("ROI", gray)
 	img_roi = gray[ya:yb,xa:xb]
-	x, y = centro_gravidade(img_roi)
+	x, y = centro_gravidade(img_roi, 180)
+	graficoErro.add(x, y, time.time())
 	print(x, y)
 	img_roi_color = img[ya:yb,xa:xb]
 	draw_cross(img_roi_color, x, y)
 	cv2.imshow("ROI", img_roi_color)
 	control.on_off(x, y, roi.roi_width/2, roi.roi_height/2)
-	key = cv2.waitKey(1) & 0xFF
+	key = cv2.waitKey(167) & 0xFF #60Hz
 	if(key == ord('q')):
+		out.parado()
 		break
+	if(key == ord('s')):
+		graficoErro.plot()
+		cv2.waitKey(0)

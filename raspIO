@@ -3,7 +3,7 @@ import RPi.GPIO as io
 import sys
 
 class outputClass:
-    u,d,l,r = 31,33,36,37 #pinos de controle para cima, baixo, esquerda e direita
+    u,d,l,r = 33,37,36,31 #pinos de controle para cima, baixo, esquerda e direita
 
     def __init__(self):
         io.setmode(io.BOARD)
